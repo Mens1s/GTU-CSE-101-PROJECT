@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdlib.h>
-void menu();
+#include <unistd.h>
+#include <string.h>
 void serial_Connection();
-
-
 
 HANDLE hComm;
 BOOL Status;
@@ -14,135 +13,56 @@ DWORD dwEventMask;
 int main(void) {
 	// Defining variables 
 	
-	char dosya[15];
-	FILE *input;
-	/*
-	input=fopen("result.txt","r+");
+	char dosya[15];//python write human status and we get it in this variable
+	FILE *input; // human status file
 
-	fscanf(input,"%s",dosya);**/
-    char number[10]; // for square number 
 	char quit[10]; 
 	char choice[10]; // choice variable
 	char dataFromCard;
 	char data[256]; // data from arduino
-
-	serial_Connection(); // I create connection with arduino which connects COM4 port
+	int temp = 0;
+	serial_Connection(); // We create connection with arduino which connects COM4 port
+	Sleep(3000);
     while(1) {
 		input=fopen("../3_app/result.txt","r+");
-
-		fscanf(input,"%s",dosya);
-		printf("%s",dosya);
+		fscanf(input,"%s",dosya);// we get human status 
 		DWORD dNoOFBytestoWrite;    
 		DWORD dNoOfBytesWritten = 0; 
 		DWORD NoBytesRead;
 		dNoOFBytestoWrite = sizeof(choice);
-		int press_counter = 0;
+
+		int unmasked_people = 0;
 		
-		if(dosya[0] == '1' || dosya[0] == '2' || dosya[0] == '3'){
+		if(dosya[0] == '1' && temp != 1){
+			
+			unmasked_people += 1;
+			temp = 1;
 			// write user's choice to arduino 
 			Status = WriteFile(hComm,                 
-							dosya,          
+							dosya,        // send human status to arduino   
 							dNoOFBytestoWrite,  
 							&dNoOfBytesWritten, 
 							NULL);
 		}
-		else if(dosya[0] == '1'){
+		else if(dosya[0] == '2' && temp != 2){
+			temp = 2;
 			// write user's choice to arduino 
 			Status = WriteFile(hComm,                 
-							choice,          
+							dosya,  // send human status to arduino        
 							dNoOFBytestoWrite,  
 							&dNoOfBytesWritten, 
 							NULL);
-			
-			printf("Please enter the number to be squared by the arduino :");
-			scanf("%s", number); // taking number 
-			// write user's number to arduino 
-			Status = WriteFile(hComm,                 
-							dosya,          
-							dNoOFBytestoWrite,  
-							&dNoOfBytesWritten, 
-							NULL);
-			// taking squared number from arduino 				
-			printf("Result is ");
-			int i = 0;
-			Status = WaitCommEvent(hComm, &dwEventMask, NULL);
-			
-			do{
-            	Status = ReadFile(hComm,
-								&dataFromCard, 
-								sizeof(dataFromCard), 
-								&NoBytesRead, 
-								NULL);
-            	data[i] = dataFromCard;     
-            	i++;
-        	} while (NoBytesRead > 0);
-			
-			
-			for (int a = 0; a < i - 1; a++) 
-				printf("%c",data[a]);
-				
 		}
-		else if(choice[0] == '5'){
-			// write user's choice to arduino 
-			Status = WriteFile(hComm,                 
-							choice,          
-							dNoOFBytestoWrite,  
-							&dNoOfBytesWritten, 
-							NULL);
-							
-			
-			printf("\nPlease enter how many times to press the button : ");
-			scanf("%d",&press_counter);
-			printf("\nThe counter started to counting.\nYou can press button\n");
-			
-			
-			int i = 0;
-			float a = 0;
-			int flush_control = 0;
-			// taking press number from arduino
-			do{
-				Status = WaitCommEvent(hComm, &dwEventMask, NULL);
-				do{
-					Status = ReadFile(hComm,
-									&dataFromCard, 
-									sizeof(dataFromCard), 
-									&NoBytesRead, 
-									NULL);
-					data[i] = dataFromCard;
-					
-					if((int)data[i]<50 || flush_control == 1){
-						printf("%c",data[i]);		
-						flush_control = 1;
-					}
-					i++;
-				} while (NoBytesRead > 0);
-				a+=0.5;
-			}while(press_counter != a);
-	
-		}
-		
-		else if(choice[0] == '6') menu();
-		else if(choice[0] == '0') break;
-		//else printf("Please enter right number! ");
-		
+		fclose(input);
+		Sleep(3000);
 	}	
 	//closing port	
 	CloseHandle(hComm);
 	return 0;
 }
 
-
-void menu(){
-	printf("##\tWELCOME TO GTU ARDUINO LAB       ##"
-		   "\n##\tStudent Name : Ahmet Yigit       ##"
-		   "\n##\tPlease Select From Following     ##");  
-    printf("\n\t\t\t MENU\n \n(1) TURN ON LED ON ARDUINO \n(2) TURN OFF LED ON ARDUINO\n(3) FLASH ARDUINO LED 3 TIMES\n(4) SEND A NUMBER TO ARDUINO TO COMPUTE SQUARE BY ARDUINO\n(5) Button press counter (bonus item)\n(6) Display Menu\n(0) EXIT");    
-}
-
 void serial_Connection(){
-	
-	
-	                     
+		                     
     char ComPortName[] = "\\\\.\\COM4"; //Our port name
                            
      
