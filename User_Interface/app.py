@@ -35,16 +35,16 @@ class mainWindow(QtWidgets.QWidget):
         super().__init__()
         self.setWindowIcon(QtGui.QIcon("./images/icon.png")) #windows icon
         self.setWindowTitle("FACE MASK RECOGNITION by GTU")
-        self.setFixedSize(600,600)
+        self.setFixedSize(1000,1000)
         
         #widgets 
         label = QtWidgets.QLabel("<h2>Health Automation System by <b>GTU Students</b></h2>")
         self.cameraButton = QtWidgets.QPushButton("Open Camera",clicked=self.cameraButtonClick, checkable=True)
-        
+        #This line close or open camera
         
         #screen
         self.screen = QtWidgets.QLabel()
-        self.image = QtGui.QPixmap(600,400)
+        self.image = QtGui.QPixmap(800,800)
         self.image.fill(QtGui.QColor('darkGrey'))
         self.screen.setPixmap(self.image)
         
@@ -70,11 +70,11 @@ class mainWindow(QtWidgets.QWidget):
             self.capture.change_pixmap_signal.connect(self.updateImage)
             self.capture.start()
             
-        
+        #This function close camera
         elif status == False:
             self.cameraButton.setText("Open Camera")
             self.capture.stop()
-            
+    #This function calls our AI and get results
     @QtCore.pyqtSlot(np.ndarray)
     def updateImage(self,image_array):
         rgb_image = cv2.cvtColor(image_array,cv2.COLOR_BGR2RGB)
@@ -82,7 +82,7 @@ class mainWindow(QtWidgets.QWidget):
         bytes_per_line = ch*w     
               
         convertedImg = QtGui.QImage(rgb_image.data,w,h,bytes_per_line,QtGui.QImage.Format_RGB888)
-        scaleImg = convertedImg.scaled(600,400,QtCore.Qt.KeepAspectRatio)      
+        scaleImg = convertedImg.scaled(800,800,QtCore.Qt.KeepAspectRatio)      
         qt_image = QtGui.QPixmap.fromImage(scaleImg)
         
         self.screen.setPixmap(qt_image)
