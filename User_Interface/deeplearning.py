@@ -36,6 +36,7 @@ def getColor(label):
         file.write('4')
         file.close()
         color = (255,255,0)
+    time.sleep(0.2)
     return color
 
 def face_mask_prediction(img):
